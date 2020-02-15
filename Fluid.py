@@ -153,7 +153,7 @@ class Fluid:
 
         max_extreme_e1, point1_e1, point2_e1 = object1.getCoallisionEdge(normal) # incident edge
         max_extreme_e2, point1_e2, point2_e2 = object2.getCoallisionEdge(-normal) # reference edge
-        print(max_extreme_e1, point1_e1, point2_e1, object2.angle, normal)
+        #print(max_extreme_e1, point1_e1, point2_e1, object2.angle, normal)
         if isinstance(object1, Ball):
             return max_extreme_e1
         if isinstance(object2, Ball):
@@ -203,7 +203,7 @@ class Fluid:
         if d2 >= 0:
             clipped.append(point2_e1)
 
-        if d1 < 0 or d2 < 0:
+        if d1 * d2 < 0:
             u = d1 / (d1 - d2)
             e1 = point2_e1 - point1_e1
             e1 *= u

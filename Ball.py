@@ -39,7 +39,7 @@ class Ball(Shape):
 
     def getCoallisionEdge(self, normal):
 
-        v = self.getCenter() - normal*self.radius
+        v = self.getCenter() + normal*self.radius
 
         return v, v, self.getCenter()
 
