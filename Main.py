@@ -44,7 +44,7 @@ def main():
 
     enviroment = Fluid(1.225, np.array([0, 0]))
     #ball = Ball(10, (250, 0, 0), 15, enviroment)
-    ball = Rect(10, (250, 0, 0), 100, 20, enviroment)
+    ball = Rect(10, (250, 0, 0), 200, 10, enviroment)
     ball.position[0] = 200
     #ball.angle = 1
     east_wall = Rect(100, (0, 250, 0), 50, HEIGTH, enviroment, True)

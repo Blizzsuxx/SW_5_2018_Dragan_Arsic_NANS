@@ -150,9 +150,9 @@ class Fluid:
         object2 = node.items[1] # reference object
         normal = node.value1
 
-        max_extreme_e1, point1_e1, point2_e1 = object1.getCoallisionEdge(normal) # incident edge
-        max_extreme_e2, point1_e2, point2_e2 = object2.getCoallisionEdge(-normal) # reference edge
-
+        max_extreme_e1, point1_e1, point2_e1 = object2.getCoallisionEdge(-normal) # incident edge
+        max_extreme_e2, point1_e2, point2_e2 = object1.getCoallisionEdge(normal) # reference edge
+        print(max_extreme_e1, point1_e1, point2_e1, object1.angle, normal)
         if isinstance(object1, Ball):
             return max_extreme_e1
         if isinstance(object2, Ball):
@@ -182,11 +182,13 @@ class Fluid:
                 clips.pop(0)
         elif normal.dot(clips[1]) - max_value < 0:
             clips.pop(1)
-
+        print(clips)
+        dot = None
         if len(clips) == 2:
             clips[0] = (clips[0] + clips[1])/2
             clips.pop()
-        dot = clips[0]
+        if len(clips) == 1:
+            dot = clips[0]
         return dot
 
     def clip(self, point1_e1, point2_e1, e2, o1):
@@ -217,7 +219,8 @@ class Fluid:
             return
 
         #print(coallisions[0].value1, coallisions[0].value2, "AA")
-        for node in coallisions:
+        for i in range(len(coallisions)):
+            node = coallisions[i]
 
             referenced_object = node.items[0]
             incident_object = node.items[1]
@@ -228,6 +231,9 @@ class Fluid:
                 node.value1 *= -1
             normal = node.value1
             point_of_coallision = self.find_point(node)
+            if point_of_coallision is None:
+                coallisions[i] = None
+                continue
 
             r1 = point_of_coallision - referenced_object.getCenter()
             r2 = point_of_coallision - incident_object.getCenter()
@@ -248,6 +254,8 @@ class Fluid:
             node.bias = bias
 
         for node in coallisions:
+            if node is None:
+                continue
             referenced_object = node.items[0]
             incident_object = node.items[1]
             normal = node.value1
@@ -256,7 +264,7 @@ class Fluid:
             velocity_value = velocity.dot(normal)
 
 
-            print(velocity_value, normal, incident_object.angularspeed, type(incident_object))
+            #print(velocity_value, normal, incident_object.angularspeed, type(incident_object))
             normal_impulse = node.mass_normal*(-velocity_value + node.bias)
 
             """
