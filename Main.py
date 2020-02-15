@@ -8,6 +8,32 @@ import numpy as np
 from Shape import Shape
 from Rect import Rect
 
+def loop(obj, force, env, window):
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        obj.left(force)
+    if keys[pygame.K_RIGHT]:
+        obj.right(force)
+    if keys[pygame.K_UP]:
+        obj.up(force)
+    if keys[pygame.K_DOWN]:
+        obj.down(force)
+    for shape in env.shapes:
+        if not shape.sprite:
+            shape.move()
+    env.collide()
+    window.fill((0, 0, 250))
+    # pygame.draw.circle(window, obj.color, obj.position, obj.radius, 1)
+    for i in range(0, len(env.shapes)):
+        r = env.shapes[i]
+        r.resetForce()
+        if isinstance(r, Rect):
+            rect, surface = r.draw_pos()
+            window.blit(surface, rect)
+        elif isinstance(r, Ball):
+            color, position, radius = r.draw_pos()
+            pygame.draw.circle(window, color, position, radius, 0)
+    pygame.display.flip()
 
 def main():
 
@@ -17,8 +43,8 @@ def main():
     DELAY_MILISECONDS = 17
 
     enviroment = Fluid(1.225, np.array([0, 0]))
-    ball = Ball(10, (250, 0, 0), 15, enviroment)
-    #ball = Rect(10, (250, 0, 0), 200, 10, enviroment)
+    #ball = Ball(10, (250, 0, 0), 15, enviroment)
+    ball = Rect(10, (250, 0, 0), 100, 20, enviroment)
     ball.position[0] = 200
     #ball.angle = 1
     east_wall = Rect(100, (0, 250, 0), 50, HEIGTH, enviroment, True)
@@ -58,6 +84,8 @@ def main():
     window = pygame.display.set_mode( (WIDTH, HEIGTH))
     pygame.display.set_caption("Koralovo")
 
+    run = True
+
     while True:
         pygame.time.delay(DELAY_MILISECONDS)
 
@@ -65,35 +93,15 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit(0)
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            ball.left(FORCE_VALUE)
-        if keys[pygame.K_RIGHT]:
-            ball.right(FORCE_VALUE)
-        if keys[pygame.K_UP]:
-            ball.up(FORCE_VALUE)
-        if keys[pygame.K_DOWN]:
-            ball.down(FORCE_VALUE)
-        for shape in enviroment.shapes:
-            if not shape.sprite:
-                shape.move()
-        enviroment.collide()
-        window.fill((0, 0, 250))
-        #pygame.draw.circle(window, ball.color, ball.position, ball.radius, 1)
-        for i in range(0, len(enviroment.shapes)):
-            r = enviroment.shapes[i]
-            r.resetForce()
-            if isinstance(r, Rect):
-                rect, surface = r.draw_pos()
-                window.blit(surface, rect)
-            elif isinstance(r, Ball):
-                color, position, radius = r.draw_pos()
-                pygame.draw.circle(window, color, position, radius, 0)
-        pygame.display.flip()
-
-
-
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p:
+                    run = not run
+                elif event.key == pygame.K_SPACE:
+                    loop(ball, FORCE_VALUE, enviroment, window)
+        if run:
+            loop(ball, FORCE_VALUE, enviroment, window)
 
 
 if __name__ == '__main__':
     main()
+
