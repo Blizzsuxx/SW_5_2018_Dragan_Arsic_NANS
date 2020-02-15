@@ -147,12 +147,12 @@ class Fluid:
 
     def find_point(self, node):
 
-        object1 = node.items[0] # reference object
-        object2 = node.items[1] # incident object
+        object1 = node.items[1] # incident object
+        object2 = node.items[0] # reference object
         normal = node.value1
 
-        max_extreme_e1, point1_e1, point2_e1 = object1.getCoallisionEdge(normal) # reference edge
-        max_extreme_e2, point1_e2, point2_e2 = object2.getCoallisionEdge(-normal) # incident edge
+        max_extreme_e1, point1_e1, point2_e1 = object1.getCoallisionEdge(-normal) # incident edge
+        max_extreme_e2, point1_e2, point2_e2 = object2.getCoallisionEdge(normal) # reference edge
         #print(max_extreme_e1, point1_e1, point2_e1, object2.angle, normal)
         if isinstance(object1, Ball):
             return max_extreme_e1
@@ -165,7 +165,7 @@ class Fluid:
 
         o1 = e2.dot(point1_e2)
 
-        clips = self.clip(point1_e2, point2_e2, e2, o1)
+        clips = self.clip(point1_e1, point2_e1, e2, o1)
         if len(clips) < 2:
             return
 
@@ -175,7 +175,7 @@ class Fluid:
         if len(clips) < 2:
             return
 
-        max_value = normal.dot(max_extreme_e1)
+        max_value = normal.dot(max_extreme_e2)
 
         if normal.dot(clips[0]) - max_value > 0:
             clips.pop(0)
@@ -183,7 +183,8 @@ class Fluid:
                 clips.pop(0)
         elif normal.dot(clips[1]) - max_value > 0:
             clips.pop(1)
-        print(clips, point2_e2, point1_e2)
+        for c in clips:
+            Debug.draw_point(c, (50, 50, 50))
         dot = None
         if len(clips) == 2:
             clips[0] = (clips[0] + clips[1])/2
