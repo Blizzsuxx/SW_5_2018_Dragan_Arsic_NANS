@@ -2,6 +2,7 @@
 from Ball import Ball
 from node import Node
 from Shape import Shape
+from Debug import Debug
 import numpy as np
 
 
@@ -211,9 +212,6 @@ class Fluid:
         return clipped
 
     def collide(self):
-
-        points = []
-
         coallisions = self.check_coallision()
         if not coallisions:
             return
@@ -234,8 +232,9 @@ class Fluid:
             if point_of_coallision is None:
                 coallisions[i] = None
                 continue
+            # DRAW COLLISION POINTS
             else:
-                points.append(point_of_coallision)
+                Debug.draw_point(point_of_coallision)
 
             r1 = point_of_coallision - referenced_object.getCenter()
             r2 = point_of_coallision - incident_object.getCenter()
@@ -291,8 +290,6 @@ class Fluid:
             if not incident_object.sprite:
                 incident_object.vector += 1 / incident_object.mass * impulse
                 incident_object.angularspeed += 1 / incident_object.inertia * np.cross(node.r2, impulse)
-
-        return points
 
 
 
