@@ -1,9 +1,6 @@
 import pygame
 
 class Debug:
-
-    window = None
-
     queue = []
 
     @staticmethod
@@ -11,9 +8,9 @@ class Debug:
         Debug.queue.append([color, point.astype(int)])
 
     @staticmethod
-    def refresh():
-        if Debug.window is not None:
+    def refresh(window):
+        if window is not None:
             for point in Debug.queue:
-                pygame.draw.circle(Debug.window, point[0], point[1], 10)
+                pygame.draw.circle(window, point[0], point[1], 10)
 
         Debug.queue = []

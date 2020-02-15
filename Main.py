@@ -34,7 +34,7 @@ def loop(obj, force, env, window):
         elif isinstance(r, Ball):
             color, position, radius = r.draw_pos()
             pygame.draw.circle(window, color, position, radius, 0)
-    Debug.refresh()
+    Debug.refresh(window)
     pygame.display.flip()
 
 def main():
@@ -84,7 +84,6 @@ def main():
 
     pygame.init()
     window = pygame.display.set_mode( (WIDTH, HEIGTH))
-    Debug.window = window
     pygame.display.set_caption("Koralovo")
 
     run = True
