@@ -32,7 +32,7 @@ def projektuj(shape, n):
 
 class Fluid:
 
-    BETA = 0.3
+    BETA = 0.2
     SLOP = 0.03
 
 
@@ -41,7 +41,8 @@ class Fluid:
         self.density = density
         self.velocity = velocity
         self.shapes = shapes
-        self.cashed_data = {}
+        self.cashed_data_old = {}
+        self.cashed_data_new = {}
 
     def add(self, other):
         self.shapes.append(other)
@@ -240,6 +241,7 @@ class Fluid:
             r1 = point_of_coallision - referenced_object.getCenter()
             r2 = point_of_coallision - incident_object.getCenter()
 
+
             rn1 = r1.dot(normal)
             rn2 = r2.dot(normal)
             k_normal = 1/referenced_object.mass + 1/incident_object.mass
@@ -255,32 +257,46 @@ class Fluid:
             node.mass_normal = mass_normal
             node.bias = bias
 
+        #self.cashed_data_new = {}
         for node in coallisions:
             if node is None:
                 continue
             referenced_object = node.items[0]
             incident_object = node.items[1]
             normal = node.value1
-            velocity = incident_object.vector + incident_object.angularspeed * node.r2 - referenced_object.angularspeed * node.r1
+            velocity = incident_object.vector + incident_object.angularspeed * node.r2 - referenced_object.angularspeed * node.r1 - referenced_object.vector
 
             velocity_value = velocity.dot(normal)
-
+            print(velocity_value)
 
             #print(velocity_value, normal, incident_object.angularspeed, type(incident_object))
             normal_impulse = node.mass_normal*(-velocity_value + node.bias)
 
+            key = (str(id(referenced_object)) + str(id(incident_object)))
+            if key in self.cashed_data_new:
+                p = self.cashed_data_new[key]
+                self.cashed_data_new[key] = max(p + normal_impulse, 0)
+                normal_impulse = self.cashed_data_new[key] - p
+                self.cashed_data_new.pop(key)
+            else:
+                normal_impulse = max(normal_impulse, node.bias * node.mass_normal)
+                self.cashed_data_new[key] = normal_impulse
+
+
+
+
+
             """
             key = (str(id(referenced_object)) + str(id(incident_object)))
-            if key in self.cashed_data:
-                p = self.cashed_data[key]
-                self.cashed_data[key] = max(p + normal_impulse, 0)
-                normal_impulse = self.cashed_data[key] - p
+            if key in self.cashed_data_old:
+                p = self.cashed_data_old[key]
+                self.cashed_data_new[key] = max(p + normal_impulse, 0)
+                normal_impulse = self.cashed_data_new[key] - p
             else:
-                normal_impulse = max(normal_impulse, 0)
-                self.cashed_data[key] = normal_impulse
+                normal_impulse = max(normal_impulse, node.bias*node.mass_normal)
+                self.cashed_data_new[key] = normal_impulse
             """
 
-            normal_impulse = max(normal_impulse, node.bias*node.mass_normal)
             #print(normal_impulse, node.bias)
 
             impulse = normal_impulse*normal
@@ -291,6 +307,7 @@ class Fluid:
             if not incident_object.sprite:
                 incident_object.vector += 1 / incident_object.mass * impulse
                 incident_object.angularspeed += 1 / incident_object.inertia * np.cross(node.r2, impulse)
+        #self.cashed_data_old = self.cashed_data_new
 
 
 

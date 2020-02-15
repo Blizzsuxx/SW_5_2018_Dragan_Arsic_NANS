@@ -41,13 +41,13 @@ def main():
 
     HEIGTH = Shape.HEIGTH
     WIDTH = Shape.WIDTH
-    FORCE_VALUE = 5000
+    FORCE_VALUE = 500
     DELAY_MILISECONDS = 17
 
     enviroment = Fluid(1.225, np.array([0, 0]))
-    #ball = Ball(10, (250, 0, 0), 15, enviroment)
+    ball = Ball(10, (250, 0, 0), 15, enviroment)
     ball = Rect(10, (250, 0, 0), 200, 10, enviroment)
-    ball.position[0] = 200
+    #ball.position[0] = 200
     #ball.angle = 1
     east_wall = Rect(100, (0, 250, 0), 50, HEIGTH, enviroment, True)
     east_wall.position[0] = WIDTH - 5
@@ -66,7 +66,7 @@ def main():
     north_wall.position[1] = 50
 
 
-    square = Rect(1, (0, 250, 0), 15, 15, enviroment, False)
+    square = Rect(1, (0, 250, 0), 30, 30, enviroment, False)
     square.position[0] = 250
     square.position[1] = 250
 
@@ -79,7 +79,7 @@ def main():
     enviroment.add(west_wall)
     enviroment.add(south_wall)
     enviroment.add(north_wall)
-    #enviroment.add(square)
+    enviroment.add(square)
     enviroment.add(sprite_ball)
 
     pygame.init()
