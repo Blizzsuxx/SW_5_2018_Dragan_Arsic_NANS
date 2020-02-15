@@ -210,17 +210,10 @@ class Fluid:
             clipped.append(e1)
         return clipped
 
-    def get_collision_points(self):
-        cols = self.check_coallision()
-        points = []
-        for c in cols:
-            c_point = self.find_point(c)
-            if c_point is not None:
-                points.append(c_point)
-        return points
-
-
     def collide(self):
+
+        points = []
+
         coallisions = self.check_coallision()
         if not coallisions:
             return
@@ -241,6 +234,8 @@ class Fluid:
             if point_of_coallision is None:
                 coallisions[i] = None
                 continue
+            else:
+                points.append(point_of_coallision)
 
             r1 = point_of_coallision - referenced_object.getCenter()
             r2 = point_of_coallision - incident_object.getCenter()
@@ -297,6 +292,7 @@ class Fluid:
                 incident_object.vector += 1 / incident_object.mass * impulse
                 incident_object.angularspeed += 1 / incident_object.inertia * np.cross(node.r2, impulse)
 
+        return points
 
 
 

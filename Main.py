@@ -21,7 +21,7 @@ def loop(obj, force, env, window):
     for shape in env.shapes:
         if not shape.sprite:
             shape.move()
-    env.collide()
+    col_points = env.collide()
     window.fill((0, 0, 250))
     # pygame.draw.circle(window, obj.color, obj.position, obj.radius, 1)
     for i in range(0, len(env.shapes)):
@@ -33,8 +33,11 @@ def loop(obj, force, env, window):
         elif isinstance(r, Ball):
             color, position, radius = r.draw_pos()
             pygame.draw.circle(window, color, position, radius, 0)
-    for point in env.get_collision_points():
-        pygame.draw.circle(window, (250, 250, 250), point.astype(int), 10)
+
+    if col_points is not None:
+        for point in col_points:
+            pygame.draw.circle(window, (250, 250, 250), point.astype(int), 10)
+
     pygame.display.flip()
 
 def main():
