@@ -7,6 +7,7 @@ from Fluid import Fluid
 import numpy as np
 from Shape import Shape
 from Rect import Rect
+from Debug import Debug
 
 def loop(obj, force, env, window):
     keys = pygame.key.get_pressed()
@@ -33,11 +34,7 @@ def loop(obj, force, env, window):
         elif isinstance(r, Ball):
             color, position, radius = r.draw_pos()
             pygame.draw.circle(window, color, position, radius, 0)
-
-    if col_points is not None:
-        for point in col_points:
-            pygame.draw.circle(window, (250, 250, 250), point.astype(int), 10)
-
+    Debug.refresh(window)
     pygame.display.flip()
 
 def main():
