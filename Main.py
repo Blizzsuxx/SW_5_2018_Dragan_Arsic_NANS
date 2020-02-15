@@ -33,6 +33,8 @@ def loop(obj, force, env, window):
         elif isinstance(r, Ball):
             color, position, radius = r.draw_pos()
             pygame.draw.circle(window, color, position, radius, 0)
+    for point in env.get_collision_points():
+        pygame.draw.circle(window, (250, 250, 250), point.astype(int), 10)
     pygame.display.flip()
 
 def main():
@@ -52,7 +54,7 @@ def main():
     east_wall.position[1] = HEIGTH/2
 
     west_wall = Rect(100, (0, 250, 0), 50, HEIGTH, enviroment, True)
-    west_wall.position[0] = 0
+    west_wall.position[0] = 50
     west_wall.position[1] = HEIGTH/2
 
     south_wall = Rect(100, (0, 250, 0), WIDTH, 50, enviroment, True)
@@ -61,7 +63,7 @@ def main():
 
     north_wall = Rect(100, (0, 250, 0), WIDTH, 50, enviroment, True)
     north_wall.position[0] = WIDTH/2
-    north_wall.position[1] = 0
+    north_wall.position[1] = 50
 
 
     square = Rect(1, (0, 250, 0), 15, 15, enviroment, False)
@@ -77,7 +79,7 @@ def main():
     enviroment.add(west_wall)
     enviroment.add(south_wall)
     enviroment.add(north_wall)
-    enviroment.add(square)
+    #enviroment.add(square)
     enviroment.add(sprite_ball)
 
     pygame.init()

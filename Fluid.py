@@ -150,9 +150,9 @@ class Fluid:
         object2 = node.items[1] # reference object
         normal = node.value1
 
-        max_extreme_e1, point1_e1, point2_e1 = object2.getCoallisionEdge(-normal) # incident edge
-        max_extreme_e2, point1_e2, point2_e2 = object1.getCoallisionEdge(normal) # reference edge
-        print(max_extreme_e1, point1_e1, point2_e1, object1.angle, normal)
+        max_extreme_e1, point1_e1, point2_e1 = object1.getCoallisionEdge(normal) # incident edge
+        max_extreme_e2, point1_e2, point2_e2 = object2.getCoallisionEdge(-normal) # reference edge
+        print(max_extreme_e1, point1_e1, point2_e1, object2.angle, normal)
         if isinstance(object1, Ball):
             return max_extreme_e1
         if isinstance(object2, Ball):
@@ -210,7 +210,14 @@ class Fluid:
             clipped.append(e1)
         return clipped
 
-
+    def get_collision_points(self):
+        cols = self.check_coallision()
+        points = []
+        for c in cols:
+            c_point = self.find_point(c)
+            if c_point is not None:
+                points.append(c_point)
+        return points
 
 
     def collide(self):
