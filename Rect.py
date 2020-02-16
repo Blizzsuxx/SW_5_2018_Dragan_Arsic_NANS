@@ -4,10 +4,10 @@ import pygame
 
 class Rect(Shape):
 
-    def __init__(self, mass, color, a, b, enviroment, sprite=False):
-        super().__init__(mass, color, enviroment, sprite)
-        self.a = a
-        self.b = b
+    def __init__(self, mass, color, a, b, enviroment, friction, sprite=False):
+        super().__init__(mass, color, enviroment, friction, sprite)
+        self.a = a/Shape.SCALING_FACTOR
+        self.b = b/Shape.SCALING_FACTOR
         self.density = mass/(a*b)
         self.drag_constant = 1 / 2 * enviroment.density * Shape.C_CUBE * b**2
         self.inertia = self.mass * (self.a * self.a + self.b * self.b) / 12
@@ -81,18 +81,6 @@ class Rect(Shape):
     def getCenter(self):
         return self.position
 
-    def move(self):
-        #print(self.position)
-        pos = self.position - self.getCenter()
-        self.torque = pos[0] * self.force[1] - pos[1] * self.force[0]
-        self.angularspeed = self.angularspeed + Shape.DELTA_TIME * self.torque / self.inertia
-        self.angularspeed *= 0.9
-        self.angle = self.angle + Shape.DELTA_TIME * self.angularspeed
-        for i in range(len(self.vector)):
-            self.vector[i] = self.vector[i] + Shape.DELTA_TIME * self.calculate_force(i)
-            temp = Shape.DELTA_TIME * self.vector[i]
-            self.position[i] = self.position[i] + temp
-
     """
     def calculate_force(self, i):
         if i == 0:
@@ -104,27 +92,26 @@ class Rect(Shape):
     """
     
     def draw_pos(self):
-        """
+
         X = np.array([
-            [2, 0, 0],
-            [0, 2, 0],
+            [Shape.SCALING_FACTOR, 0, 0],
+            [0, Shape.SCALING_FACTOR, 0],
             [0, 0, 1]
         ])
         pg = np.array([self.position[0], self.position[1], 1])
         ps = X.dot(pg)
         ps = np.array((ps[0], ps[1]))
-        """
 
         new_surface = pygame.transform.rotate(self.pygame_surface, -self.angle*180/np.pi)
         #new_surface = self.pygame_surface.copy()
 
         rect = new_surface.get_rect()
-        #print(self.position)
         if np.any(self.position > 2147483647) or np.any(self.position < -2147483647):
             self.position[0] = 100
             self.position[1] = 100
             self.vector[0] = 10
             self.vector[1] = 10
-        rect.center = self.position
+        rect.center = ps
 
         return rect, new_surface
+

@@ -9,7 +9,24 @@ import numpy as np
 
 
 
+def cross(scalar, vector):
+    if isinstance(vector, np.ndarray):
+        new_x = -scalar*vector[1]
+        new_y = scalar*vector[0]
+        new_vector = np.array((new_x, new_y))
+        return new_vector
+    elif isinstance(scalar, np.ndarray): #scalar je vektor zapravo
+        scalar, vector = vector, scalar
 
+        new_x = scalar*vector[1]
+        new_y = -scalar*vector[0]
+        new_vector = np.array((new_x, new_y))
+        return new_vector
+    return None
+
+
+def clamp(a, low, high):
+    return max(low, min(a, high))
 
 
 
@@ -47,6 +64,10 @@ class Fluid:
     def add(self, other):
         self.shapes.append(other)
 
+    def recalibrate_shapes_positions(self):
+        for shape in self.shapes:
+            shape.recalibrate_position()
+
     def check_coallision(self):
 
         the_list = []
@@ -59,9 +80,13 @@ class Fluid:
                     if isinstance(other, Ball):
                         temp = self.check_balls(shape, other)
                     else:
-                        temp = self.check_object_ball(shape, other)
+                        temp = self.checkObjectss(other, shape)
+                        if temp is None:
+                            temp = self.check_object_ball(shape, other)
                 elif isinstance(other, Ball):
-                    temp = self.check_object_ball(other, shape)
+                    temp = self.checkObjectss(shape, other)
+                    if temp is None:
+                        temp = self.check_object_ball(other, shape)
                 else:
                     temp = self.checkObjectss(shape, other)
                 if temp:
@@ -115,38 +140,25 @@ class Fluid:
     def check_object_ball(self, ball, other):
         if ball.sprite & other.sprite:
             return
-        normale = other.getNormals()
-        lista = []
-        the_list = []
         e1 = ball.getCenter()
+        min_d = float("inf")
+        min_edge = None
         for e2 in other.getExtremities():
-            broken = False
-            for n in normale:
-                d = e2 - e1
-                p = abs(n.dot(d))
-                s = p - ball.radius
-                if s >= 0:
-                    broken = True
-                    break
-                else:
-                    lista.append(Node(n, s, [ball, other]))
-                    #print("NORMALA: ", n)
-            if not broken:
-                lista.sort()
-                the_list.append(lista[0])
-            else:
-                lista.clear()
-
-        if the_list:
-            the_list.sort()
-            print("LIST WORKED")
-            return the_list[0]
+            d = e1 - e2
+            d = np.linalg.norm(d)
+            if min_d < d:
+                min_d = d
+                min_edge = e2
+        if min_d < ball.radius:
+            normal = min_edge / np.linalg.norm(min_edge)
+            return Node(normal, min_d, (ball, other))
         else:
-            return self.checkObjectss(other, ball)
+            return None
 
 
 
     def find_point(self, node):
+        # Kod pisan po uzoru na http://www.dyn4j.org/2011/11/contact-points-using-clipping/
 
         object1 = node.items[1] # incident object
         object2 = node.items[0] # reference object
@@ -158,7 +170,13 @@ class Fluid:
         if isinstance(object1, Ball):
             return max_extreme_e1
         if isinstance(object2, Ball):
-            return max_extreme_e2
+            d1 = object2.getCenter() - point1_e1
+            d2 = object2.getCenter() - point2_e1
+            d1 = np.linalg.norm(d1)
+            d2 = np.linalg.norm(d2)
+            if d1 < d2:
+                return point1_e1
+            return point2_e1
 
         e2 = point2_e2 - point1_e2
 
@@ -195,6 +213,7 @@ class Fluid:
         return dot
 
     def clip(self, point1_e1, point2_e1, e2, o1):
+        # Kod pisan po uzoru na http://www.dyn4j.org/2011/11/contact-points-using-clipping/
 
         clipped = []
         d1 = e2.dot(point1_e1) - o1
@@ -213,7 +232,11 @@ class Fluid:
             clipped.append(e1)
         return clipped
 
+
+
     def collide(self):
+        # Kod pisan po uzoru na https://github.com/erincatto/box2d-lite/
+
         coallisions = self.check_coallision()
         if not coallisions:
             return
@@ -237,7 +260,7 @@ class Fluid:
             # DRAW COLLISION POINTS
             else:
                 Debug.draw_point(point_of_coallision)
-
+            #print(normal)
             r1 = point_of_coallision - referenced_object.getCenter()
             r2 = point_of_coallision - incident_object.getCenter()
 
@@ -252,6 +275,15 @@ class Fluid:
 
             bias = -Fluid.BETA * (1/Shape.DELTA_TIME)*min(0, node.value2 + Fluid.SLOP)
 
+
+            tangent = cross(normal, 1)
+            rt1 = r1.dot(tangent)
+            rt2 = r2.dot(tangent)
+            k_tangent = 1/referenced_object.mass + 1/incident_object.mass
+            k_tangent += (1/referenced_object.inertia) * (r1.dot(r1) - rt1*rt1) + (1/incident_object.inertia) * (r2.dot(r2) - rt2*rt2)
+            mass_tangent = 1/k_tangent
+            node.mass_tangent = mass_tangent
+
             node.r1 = r1
             node.r2 = r2
             node.mass_normal = mass_normal
@@ -264,14 +296,13 @@ class Fluid:
             referenced_object = node.items[0]
             incident_object = node.items[1]
             normal = node.value1
-            velocity = incident_object.vector + incident_object.angularspeed * node.r2 - referenced_object.angularspeed * node.r1 - referenced_object.vector
+            velocity = incident_object.vector + cross(incident_object.angularspeed, node.r2) - referenced_object.vector - cross(referenced_object.angularspeed, node.r1)
 
             velocity_value = velocity.dot(normal)
-            print(velocity_value)
 
-            #print(velocity_value, normal, incident_object.angularspeed, type(incident_object))
             normal_impulse = node.mass_normal*(-velocity_value + node.bias)
 
+            """
             key = (str(id(referenced_object)) + str(id(incident_object)))
             if key in self.cashed_data_new:
                 p = self.cashed_data_new[key]
@@ -281,8 +312,8 @@ class Fluid:
             else:
                 normal_impulse = max(normal_impulse, node.bias * node.mass_normal)
                 self.cashed_data_new[key] = normal_impulse
-
-
+            """
+            normal_impulse = max(normal_impulse, node.bias * node.mass_normal)
 
 
 
@@ -307,7 +338,61 @@ class Fluid:
             if not incident_object.sprite:
                 incident_object.vector += 1 / incident_object.mass * impulse
                 incident_object.angularspeed += 1 / incident_object.inertia * np.cross(node.r2, impulse)
+
+            velocity = incident_object.vector + cross(incident_object.angularspeed, node.r2) - cross(
+                referenced_object.angularspeed, node.r1) - referenced_object.vector
+            tangent = cross(normal, 1)
+            tangent_velocity_value = velocity.dot(tangent)
+            tangent_impulse_value = node.mass_tangent*(-tangent_velocity_value)
+
+
+
+            #TODO cashing
+            friction = np.sqrt(referenced_object.friction * incident_object.friction)
+            max_value = friction * normal_impulse
+
+            tangent_impulse_value = clamp(tangent_impulse_value, -max_value, max_value)
+
+            end_tangent_impulse = tangent_impulse_value * tangent
+
+
+
+            if not referenced_object.sprite:
+                referenced_object.vector -= 1/referenced_object.mass * end_tangent_impulse
+                referenced_object.angularspeed -= 1/referenced_object.inertia * np.cross(node.r1, end_tangent_impulse)
+
+            if not incident_object.sprite:
+                incident_object.vector += 1 / incident_object.mass * end_tangent_impulse
+                incident_object.angularspeed += 1 / incident_object.inertia * np.cross(node.r2, end_tangent_impulse)
+
+
+
         #self.cashed_data_old = self.cashed_data_new
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

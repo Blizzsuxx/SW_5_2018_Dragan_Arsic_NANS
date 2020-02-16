@@ -1,4 +1,4 @@
-import os
+
 
 import pygame
 
@@ -22,7 +22,7 @@ def loop(obj, force, env, window):
     for shape in env.shapes:
         if not shape.sprite:
             shape.move()
-    col_points = env.collide()
+    env.collide()
     window.fill((0, 0, 250))
     # pygame.draw.circle(window, obj.color, obj.position, obj.radius, 1)
     for i in range(0, len(env.shapes)):
@@ -43,34 +43,45 @@ def main():
     WIDTH = Shape.WIDTH
     FORCE_VALUE = 500
     DELAY_MILISECONDS = 17
+    FRICTION = 0.1
+
+    Shape.SCALING_FACTOR = 10 #TODO CHANGE THIS TO CHANGE SCALING
+    #Note - acts weird if scaling is >= 14
 
     enviroment = Fluid(1.225, np.array([0, 0]))
-    ball = Ball(10, (250, 0, 0), 15, enviroment)
-    ball = Rect(10, (250, 0, 0), 200, 10, enviroment)
-    #ball.position[0] = 200
-    #ball.angle = 1
-    east_wall = Rect(100, (0, 250, 0), 50, HEIGTH, enviroment, True)
+
+
+
+    #TODO COMMENT AND UNCOMMENT TO SWITCH FROM RECTANGLE TO BALL AND VICE VERSA
+
+    ball = Ball(10, (250, 0, 0), 15, enviroment, FRICTION)
+    #ball = Rect(10, (250, 0, 0), 200, 10, enviroment, FRICTION)
+
+    #TODO COMMENT AND UNCOMMENT TO SWITCH FROM RECTANGLE TO BALL AND VICE VERSA
+
+
+    east_wall = Rect(100, (0, 250, 0), 50, HEIGTH, enviroment, FRICTION, True)
     east_wall.position[0] = WIDTH - 5
     east_wall.position[1] = HEIGTH/2
 
-    west_wall = Rect(100, (0, 250, 0), 50, HEIGTH, enviroment, True)
+    west_wall = Rect(100, (0, 250, 0), 50, HEIGTH, enviroment, FRICTION, True)
     west_wall.position[0] = 50
     west_wall.position[1] = HEIGTH/2
 
-    south_wall = Rect(100, (0, 250, 0), WIDTH, 50, enviroment, True)
+    south_wall = Rect(100, (0, 250, 0), WIDTH, 50, enviroment, FRICTION, True)
     south_wall.position[0] = WIDTH/2
     south_wall.position[1] = HEIGTH - 5
 
-    north_wall = Rect(100, (0, 250, 0), WIDTH, 50, enviroment, True)
+    north_wall = Rect(100, (0, 250, 0), WIDTH, 50, enviroment, FRICTION, True)
     north_wall.position[0] = WIDTH/2
     north_wall.position[1] = 50
 
 
-    square = Rect(1, (0, 250, 0), 30, 30, enviroment, False)
+    square = Rect(1, (0, 250, 0), 100, 20, enviroment, FRICTION, False)
     square.position[0] = 250
     square.position[1] = 250
 
-    sprite_ball = Ball(100, (0, 250, 0), 20, enviroment, True)
+    sprite_ball = Ball(100, (0, 250, 0), 20, enviroment, FRICTION, True)
     sprite_ball.position[0] = 250
     sprite_ball.position[1] = 400
 
@@ -81,6 +92,8 @@ def main():
     enviroment.add(north_wall)
     enviroment.add(square)
     enviroment.add(sprite_ball)
+
+    enviroment.recalibrate_shapes_positions()
 
     pygame.init()
     window = pygame.display.set_mode( (WIDTH, HEIGTH))
@@ -98,7 +111,7 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p:
                     run = not run
-                elif event.key == pygame.K_SPACE:
+                elif event.key == pygame.K_SPACE and not run:
                     loop(ball, FORCE_VALUE, enviroment, window)
         if run:
             loop(ball, FORCE_VALUE, enviroment, window)

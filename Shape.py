@@ -1,5 +1,4 @@
 import numpy as np
-import pygame
 
 
 
@@ -9,6 +8,9 @@ class Shape:
     """
     WIDTH = 500
     HEIGTH = 500
+
+
+    SCALING_FACTOR = 1
 
 
 
@@ -24,7 +26,7 @@ class Shape:
     C_STREAMLINED_BODY = 0.04
     C_STREAMLINED_HALF_BODY = 0.09
 
-    def __init__(self, mass, color, enviroment, sprite=False):
+    def __init__(self, mass, color, enviroment, friction, sprite=False):
         self.position = np.array([100.0, 100.0])
         self.force = np.array([0.0, 0.0])
         self.vector = np.array([0.0, 0.0])
@@ -37,10 +39,16 @@ class Shape:
         self.angle = 0
         self.angularspeed = 0
         self.drag_constant = 0
-
+        self.friction = friction
 
     def move(self):
-        pass
+        self.angularspeed = self.angularspeed + Shape.DELTA_TIME * self.torque / self.inertia
+        self.angle = self.angle + Shape.DELTA_TIME * self.angularspeed
+        self.angularspeed *= 0.9
+        for i in range(len(self.vector)):
+            self.vector[i] = self.vector[i] + Shape.DELTA_TIME * self.calculate_force(i)
+            temp = Shape.DELTA_TIME * self.vector[i]
+            self.position[i] = self.position[i] + temp
 
     def getBorder(self, direction):
         pass
@@ -63,17 +71,19 @@ class Shape:
     def draw_pos(self):
         pass
 
+    def recalibrate_position(self):
+        self.setPosition(self.position)
+
 
     def setPosition(self, pos):
         X = np.array([
-            [2, 0, self.position[0]],
-            [0, 2, self.position[1]],
+            [Shape.SCALING_FACTOR, 0, 0],
+            [0, Shape.SCALING_FACTOR, 0],
             [0, 0, 1]
         ])
         invX = np.linalg.inv(X)
         pg = np.array([pos[0], pos[1], 1])
         ps = invX.dot(pg)
-        print(self.position, ps)
         self.position[0], self.position[1] = ps[0], ps[1]
 
     def updateSpeeds(self):

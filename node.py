@@ -1,6 +1,6 @@
 class Node:
 
-    def __init__(self, value1, value2, items=[]):
+    def __init__(self, value1, value2, items=None):
         self.value1 = value1
         self.value2 = value2
         self.items = items
@@ -14,6 +14,12 @@ class Node:
 
     def __lt__(self, other):
         return self.value2 > other.value2
+
+    def __str__(self):
+        return str(self.value2)
+
+    def __repr__(self):
+        return str(self.value2) + " - " + str(self.value1)
 
     def __gt__(self, other):
         return self.value2 < other.value2
