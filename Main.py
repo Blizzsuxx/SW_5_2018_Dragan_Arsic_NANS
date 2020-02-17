@@ -43,7 +43,7 @@ def main():
     WIDTH = Shape.WIDTH
     FORCE_VALUE = 500
     DELAY_MILISECONDS = 17
-    FRICTION = 0.1
+    FRICTION = 0.5
 
     Shape.SCALING_FACTOR = 10 #TODO CHANGE THIS TO CHANGE SCALING
     #Note - acts weird if scaling is >= 14

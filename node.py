@@ -15,11 +15,6 @@ class Node:
     def __lt__(self, other):
         return self.value2 > other.value2
 
-    def __str__(self):
-        return str(self.value2)
-
-    def __repr__(self):
-        return str(self.value2) + " - " + str(self.value1)
 
     def __gt__(self, other):
         return self.value2 < other.value2

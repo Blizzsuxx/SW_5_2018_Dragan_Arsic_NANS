@@ -14,6 +14,10 @@ class Rect(Shape):
         self.pygame_surface = pygame.Surface((a, b))
         self.pygame_surface.set_colorkey((0, 0, 0))
         self.pygame_surface.fill(color)
+        if not sprite:
+            self.inverse_inertia = 1/self.inertia
+        else:
+            self.inertia = float("inf")
 
     def getExtremities(self):
         extremities = []

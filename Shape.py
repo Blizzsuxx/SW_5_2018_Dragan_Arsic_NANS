@@ -40,6 +40,9 @@ class Shape:
         self.angularspeed = 0
         self.drag_constant = 0
         self.friction = friction
+        self.inverse_inertia = 0
+
+        self.flag = False
 
     def move(self):
         self.angularspeed = self.angularspeed + Shape.DELTA_TIME * self.torque / self.inertia
@@ -74,6 +77,26 @@ class Shape:
     def recalibrate_position(self):
         self.setPosition(self.position)
 
+    def integrate_velocities(self):
+        if self.flag or self.sprite: #vec smo integrisali ovaj frame
+            return
+        self.angle = self.angle + Shape.DELTA_TIME * self.angularspeed
+        for i in range(len(self.vector)):
+            temp = Shape.DELTA_TIME * self.vector[i]
+            self.position[i] = self.position[i] + temp
+        self.flag = True
+
+    def reset_flag(self):
+        self.flag = False
+
+
+    def add_impulse(self, impulse, normal):
+        if self.sprite:
+            return
+        self.vector += (1 / self.mass) * impulse
+        self.angularspeed += self.inverse_inertia * np.cross(normal, impulse)
+
+
 
     def setPosition(self, pos):
         X = np.array([
@@ -87,6 +110,9 @@ class Shape:
         self.position[0], self.position[1] = ps[0], ps[1]
 
     def updateSpeeds(self):
+        if self.sprite:
+            return
+
         self.angularspeed = self.angularspeed + Shape.DELTA_TIME * self.torque / self.inertia
         for i in range(len(self.vector)):
             self.vector[i] = self.vector[i] + Shape.DELTA_TIME * self.calculate_force(i)

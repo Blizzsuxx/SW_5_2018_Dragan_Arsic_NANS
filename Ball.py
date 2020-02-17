@@ -17,7 +17,10 @@ class Ball(Shape):
         self.density = mass / (radius**2 * np.pi)
         self.drag_constant = 1/2 * enviroment.density * Shape.C_SPHERE * radius**2 * pi
         self.inertia = 1/4 * self.mass * self.radius * self.radius
-
+        if not sprite:
+            self.inverse_inertia = 1/self.inertia
+        else:
+            self.inertia = float("inf")
 
     def getExtremities(self, normal):
         return [self.position + normal*self.radius, self.position - normal*self.radius]
