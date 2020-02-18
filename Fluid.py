@@ -321,12 +321,9 @@ class Fluid:
 
                 normal_impulse = node.mass_normal*(-velocity_value + node.bias)
 
-                if node.key in self.cashed_data_new:
-                    temp = node.normal_impulse
-                    node.normal_impulse = max(temp + normal_impulse, 0)
-                    normal_impulse = node.normal_impulse - temp
-                else:
-                    normal_impulse = max(normal_impulse, 0)
+                temp = node.normal_impulse
+                node.normal_impulse = max(temp + normal_impulse, 0)
+                normal_impulse = node.normal_impulse - temp
 
 
                 impulse = normal_impulse*normal
@@ -341,15 +338,10 @@ class Fluid:
 
                 friction = node.friction
 
-                if node.key in self.cashed_data_new:
-                    max_tangent_value = friction * node.normal_impulse
-                    old_tangent_impulse = node.tangent_impulse
-                    node.tangent_impulse = clamp(old_tangent_impulse + tangent_impulse_value, -max_tangent_value, max_tangent_value)
-                    tangent_impulse_value = node.tangent_impulse-old_tangent_impulse
-
-                else:
-                    max_value = friction * normal_impulse
-                    tangent_impulse_value = clamp(tangent_impulse_value, -max_value, max_value)
+                max_tangent_value = friction * node.normal_impulse
+                old_tangent_impulse = node.tangent_impulse
+                node.tangent_impulse = clamp(old_tangent_impulse + tangent_impulse_value, -max_tangent_value, max_tangent_value)
+                tangent_impulse_value = node.tangent_impulse-old_tangent_impulse
 
                 end_tangent_impulse = tangent_impulse_value * tangent
 
