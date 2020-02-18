@@ -25,18 +25,6 @@ class Ball(Shape):
     def getExtremities(self, normal):
         return [self.position + normal*self.radius, self.position - normal*self.radius]
 
-    def getNormals(self):
-
-        return np.array([[1.0, 0.0]])
-
-    def getBorder(self, other_object):
-
-        center = other_object.getCenter()
-        vector = self.getCenter() - center
-        vector = vector / np.linalg.norm(vector)
-
-        return vector * self.radius
-
 
 
     def getCoallisionEdge(self, normal):

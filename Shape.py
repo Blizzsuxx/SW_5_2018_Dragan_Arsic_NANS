@@ -42,8 +42,6 @@ class Shape:
         self.friction = friction
         self.inverse_inertia = 0
 
-        self.flag = False
-
     def move(self):
         self.angularspeed = self.angularspeed + Shape.DELTA_TIME * self.torque / self.inertia
         self.angle = self.angle + Shape.DELTA_TIME * self.angularspeed
@@ -52,9 +50,6 @@ class Shape:
             self.vector[i] = self.vector[i] + Shape.DELTA_TIME * self.calculate_force(i)
             temp = Shape.DELTA_TIME * self.vector[i]
             self.position[i] = self.position[i] + temp
-
-    def getBorder(self, direction):
-        pass
 
     def getCenter(self):
         pass
@@ -76,18 +71,6 @@ class Shape:
 
     def recalibrate_position(self):
         self.setPosition(self.position)
-
-    def integrate_velocities(self):
-        if self.flag or self.sprite: #vec smo integrisali ovaj frame
-            return
-        self.angle = self.angle + Shape.DELTA_TIME * self.angularspeed
-        for i in range(len(self.vector)):
-            temp = Shape.DELTA_TIME * self.vector[i]
-            self.position[i] = self.position[i] + temp
-        self.flag = True
-
-    def reset_flag(self):
-        self.flag = False
 
 
     def add_impulse(self, impulse, normal):

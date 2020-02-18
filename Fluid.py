@@ -119,7 +119,6 @@ class Fluid:
         for i in range(len(normale)):
             n = normale[i]
 
-
             p1 = projektuj(shape, n)
             p2 = projektuj(other, n)
             d = p1.inRange(p2)
